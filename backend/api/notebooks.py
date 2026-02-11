@@ -8,9 +8,6 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import Session, sessionmaker
 
-from agno.os.routers.teams.router import team_response_streamer
-from agno.os.utils import get_team_by_id
-
 from db.tables.notebook import NotebooksTable
 from db.tables.notebook_session import NotebookSessionsTable
 from db.url import db_url
@@ -154,6 +151,9 @@ async def notebook_run(
     db: Session = Depends(get_db),
 ):
     """Run the NotebookLM team with notebook context injected."""
+    from agno.os.routers.teams.router import team_response_streamer
+    from agno.os.utils import get_team_by_id
+
     if _agent_os is None:
         raise HTTPException(status_code=500, detail="AgentOS not initialized")
 

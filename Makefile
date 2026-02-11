@@ -1,5 +1,6 @@
 .PHONY: help dev down backend-up backend-dev backend-down frontend-dev frontend-build \
        deploy deploy-backend deploy-frontend deploy-all \
+       migrate-prod migrate-prod-status \
        railway-logs-backend railway-logs-frontend railway-status railway-open \
        test-backend-local test-frontend-local test-backend-prod test-frontend-prod test-prod
 
@@ -56,6 +57,12 @@ deploy-frontend: ## Redeploy frontend to Railway
 	cd frontend && railway up --service agent_ui -d
 
 deploy-all: deploy-backend deploy-frontend ## Redeploy both backend and frontend
+
+migrate-prod: ## Run Alembic migrations on production database
+	cd backend && railway run --service agent_os alembic -c alembic.ini upgrade head
+
+migrate-prod-status: ## Show current migration status on production database
+	cd backend && railway run --service agent_os alembic -c alembic.ini current
 
 railway-logs-backend: ## Tail backend logs on Railway
 	cd backend && railway logs --service agent_os
