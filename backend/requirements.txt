@@ -7,3 +7,5 @@ pgvector==0.4.2
 psycopg[binary]==3.3.2
 PyJWT
 alembic
+langwatch
+openinference-instrumentation-agno

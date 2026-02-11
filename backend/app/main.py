@@ -6,7 +6,11 @@ from agno.os import AgentOS
 
 from agents.notebooklm_team import notebooklm_team
 from api.notebooks import router as notebooks_router, set_agent_os
+from app import instrumentation
 from db import get_postgres_db
+
+# Initialize LangWatch observability before AgentOS startup
+instrumentation.setup()
 
 agent_os = AgentOS(
     name="NotebookLM",
