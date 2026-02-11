@@ -3,6 +3,7 @@ import os
 from agno.agent import Agent
 from agno.models.aws import Claude
 from agno.team import Team
+from agno.tools.duckduckgo import DuckDuckGoTools
 
 from db import get_postgres_db
 
@@ -16,13 +17,16 @@ MODEL = Claude(
 researcher = Agent(
     name="Researcher",
     id="researcher",
-    role="Research and analyze documents, extract key information, and identify important concepts",
+    role="Research and analyze documents, extract key information, identify important concepts, and search the web for additional context",
     model=MODEL,
+    tools=[DuckDuckGoTools()],
     instructions=[
         "You are a research specialist for NotebookLM.",
         "Analyze documents thoroughly and extract key facts, themes, and insights.",
         "Identify connections between different pieces of information.",
         "Provide well-structured analysis with citations from the source material.",
+        "When the user asks a question that requires up-to-date information or additional context beyond the provided documents, search the web using DuckDuckGo.",
+        "Always cite your sources, including web search results with their URLs.",
     ],
     db=get_postgres_db(),
     markdown=True,
@@ -59,4 +63,6 @@ notebooklm_team = Team(
     db=get_postgres_db(),
     markdown=True,
     add_datetime_to_context=True,
+    add_history_to_context=True,
+    num_history_runs=5,
 )
