@@ -1,0 +1,46 @@
+services:
+  notebooklm-db:
+    image: pgvector/pgvector:pg17
+    container_name: notebooklm-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER:-ai}
+      POSTGRES_PASSWORD: ${DB_PASS:-ai}
+      POSTGRES_DB: ${DB_DATABASE:-ai}
+    networks:
+      - notebooklm
+
+  notebooklm-api:
+    container_name: notebooklm-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      RUNTIME_ENV: dev
+      DB_HOST: notebooklm-db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-ai}
+      DB_PASS: ${DB_PASS:-ai}
+      DB_DATABASE: ${DB_DATABASE:-ai}
+    depends_on:
+      - notebooklm-db
+    networks:
+      - notebooklm
+
+volumes:
+  pgdata:
+
+networks:
+  notebooklm:

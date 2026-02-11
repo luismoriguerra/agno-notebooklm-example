@@ -1,0 +1,22 @@
+[project]
+name = "notebooklm"
+version = "0.1.0"
+description = "NotebookLM clone powered by Agno AgentOS"
+requires-python = ">=3.12,<4"
+dependencies = [
+    "agno[aws]",
+    "anthropic",
+    "fastapi[standard]",
+    "uvicorn",
+    "sqlalchemy",
+    "pgvector",
+    "psycopg[binary]",
+    "PyJWT",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.ruff]
+line-length = 120
