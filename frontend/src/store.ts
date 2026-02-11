@@ -7,6 +7,7 @@ import {
   TeamDetails,
   type ChatMessage
 } from '@/types/os'
+import type { Notebook } from '@/api/notebooks'
 
 interface Store {
   hydrated: boolean
@@ -54,6 +55,8 @@ interface Store {
   ) => void
   isSessionsLoading: boolean
   setIsSessionsLoading: (isSessionsLoading: boolean) => void
+  currentNotebook: Notebook | null
+  setCurrentNotebook: (notebook: Notebook | null) => void
 }
 
 export const useStore = create<Store>()(
@@ -105,7 +108,10 @@ export const useStore = create<Store>()(
         })),
       isSessionsLoading: false,
       setIsSessionsLoading: (isSessionsLoading) =>
-        set(() => ({ isSessionsLoading }))
+        set(() => ({ isSessionsLoading })),
+      currentNotebook: null,
+      setCurrentNotebook: (currentNotebook) =>
+        set(() => ({ currentNotebook }))
     }),
     {
       name: 'endpoint-storage',

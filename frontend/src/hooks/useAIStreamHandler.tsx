@@ -20,6 +20,7 @@ const useAIChatStreamHandler = () => {
   const selectedEndpoint = useStore((state) => state.selectedEndpoint)
   const authToken = useStore((state) => state.authToken)
   const mode = useStore((state) => state.mode)
+  const currentNotebook = useStore((state) => state.currentNotebook)
   const setStreamingErrorMessage = useStore(
     (state) => state.setStreamingErrorMessage
   )
@@ -144,7 +145,10 @@ const useAIChatStreamHandler = () => {
 
         let RunUrl: string | null = null
 
-        if (mode === 'team' && teamId) {
+        // Use notebook-specific run endpoint when inside a notebook
+        if (currentNotebook) {
+          RunUrl = APIRoutes.NotebookRun(endpointUrl, currentNotebook.id)
+        } else if (mode === 'team' && teamId) {
           RunUrl = APIRoutes.TeamRun(endpointUrl, teamId)
         } else if (mode === 'agent' && agentId) {
           RunUrl = APIRoutes.AgentRun(endpointUrl).replace(
@@ -437,6 +441,7 @@ const useAIChatStreamHandler = () => {
       agentId,
       teamId,
       mode,
+      currentNotebook,
       setStreamingErrorMessage,
       setIsStreaming,
       focusChatInput,

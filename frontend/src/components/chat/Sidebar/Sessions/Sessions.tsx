@@ -5,6 +5,7 @@ import { useQueryState } from 'nuqs'
 
 import { useStore } from '@/store'
 import useSessionLoader from '@/hooks/useSessionLoader'
+import { fetchNotebookSessions } from '@/api/notebooks'
 
 import SessionItem from './SessionItem'
 import SessionBlankState from './SessionBlankState'
@@ -48,12 +49,16 @@ const Sessions = () => {
     hydrated,
     sessionsData,
     setSessionsData,
-    isSessionsLoading
+    isSessionsLoading,
+    currentNotebook
   } = useStore()
 
   const [isScrolling, setIsScrolling] = useState(false)
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
+  )
+  const [notebookSessionIds, setNotebookSessionIds] = useState<Set<string>>(
+    new Set()
   )
 
   const { getSessions, getSession } = useSessionLoader()
@@ -79,6 +84,20 @@ const Sessions = () => {
       }
     }
   }, [])
+
+  // Load notebook-specific session IDs when inside a notebook
+  // Also reload when sessionsData changes (new session created via streaming)
+  useEffect(() => {
+    if (currentNotebook) {
+      const loadNotebookSessions = async () => {
+        const sessions = await fetchNotebookSessions(currentNotebook.id)
+        setNotebookSessionIds(new Set(sessions.map((s) => s.session_id)))
+      }
+      loadNotebookSessions()
+    } else {
+      setNotebookSessionIds(new Set())
+    }
+  }, [currentNotebook, sessionsData])
 
   useEffect(() => {
     if (hydrated && sessionId && selectedEndpoint && (agentId || teamId)) {
@@ -121,6 +140,18 @@ const Sessions = () => {
     []
   )
 
+  // Filter sessions when inside a notebook
+  const filteredSessions = useMemo(() => {
+    if (!sessionsData) return null
+    if (!currentNotebook || notebookSessionIds.size === 0) {
+      // When inside a notebook but no linked sessions yet, show all
+      // When not in a notebook, show all
+      if (currentNotebook) return sessionsData.filter((s) => notebookSessionIds.has(s.session_id))
+      return sessionsData
+    }
+    return sessionsData.filter((s) => notebookSessionIds.has(s.session_id))
+  }, [sessionsData, currentNotebook, notebookSessionIds])
+
   if (isSessionsLoading || isEndpointLoading) {
     return (
       <div className="w-full">
@@ -147,11 +178,11 @@ const Sessions = () => {
       >
         {!isEndpointActive ||
         (!isSessionsLoading &&
-          (!sessionsData || sessionsData?.length === 0)) ? (
+          (!filteredSessions || filteredSessions?.length === 0)) ? (
           <SessionBlankState />
         ) : (
           <div className="flex flex-col gap-y-1 pr-1">
-            {sessionsData?.map((entry, idx) => (
+            {filteredSessions?.map((entry, idx) => (
               <SessionItem
                 key={`${entry?.session_id}-${idx}`}
                 currentSessionId={selectedSessionId}

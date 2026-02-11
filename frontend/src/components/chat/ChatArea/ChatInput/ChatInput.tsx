@@ -10,12 +10,15 @@ import Icon from '@/components/ui/icon'
 
 const ChatInput = () => {
   const { chatInputRef } = useStore()
+  const currentNotebook = useStore((state) => state.currentNotebook)
 
   const { handleStreamResponse } = useAIChatStreamHandler()
   const [selectedAgent] = useQueryState('agent')
   const [teamId] = useQueryState('team')
   const [inputMessage, setInputMessage] = useState('')
   const isStreaming = useStore((state) => state.isStreaming)
+
+  const isEnabled = !!(selectedAgent || teamId || currentNotebook)
   const handleSubmit = async () => {
     if (!inputMessage.trim()) return
 
@@ -51,14 +54,12 @@ const ChatInput = () => {
           }
         }}
         className="w-full border border-accent bg-primaryAccent px-4 text-sm text-primary focus:border-accent"
-        disabled={!(selectedAgent || teamId)}
+        disabled={!isEnabled}
         ref={chatInputRef}
       />
       <Button
         onClick={handleSubmit}
-        disabled={
-          !(selectedAgent || teamId) || !inputMessage.trim() || isStreaming
-        }
+        disabled={!isEnabled || !inputMessage.trim() || isStreaming}
         size="icon"
         className="rounded-xl bg-primary p-5 text-primaryAccent"
       >
